@@ -1,9 +1,10 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ONBOARDING_STEPS } from '../../constants';
 import { useAppContext } from '../../contexts/AppContext';
 import { analyzeCharacterSheet } from '../../services/geminiService';
+import { saveCharacterSheet, saveTropes } from '../../services/supabaseService';
+import { getSymbolForText } from '../../utils/symbols';
 import type { CharacterSheet } from '../../types';
 import ProgressBar from '../common/ProgressBar';
 import ChapterCard from '../common/ChapterCard';
@@ -52,12 +53,20 @@ const OnboardingPage: React.FC = () => {
   const handleSubmit = async () => {
     setIsLoading(true);
     try {
-      const tropes = await analyzeCharacterSheet(characterSheet);
-      setTropes(tropes);
-      navigate('/dashboard');
+      // Save character sheet to Supabase
+      const savedSheet = await saveCharacterSheet(characterSheet);
+      if (savedSheet) {
+        setCharacterSheet(savedSheet);
+        
+        // Analyze and save tropes
+        const analyzedTropes = await analyzeCharacterSheet(savedSheet);
+        const savedTropes = await saveTropes(analyzedTropes, savedSheet.id!);
+        setTropes(savedTropes);
+        
+        navigate('/dashboard');
+      }
     } catch (error) {
       console.error("Failed to analyze character sheet:", error);
-      // You might want to show an error message to the user here
     } finally {
       setIsLoading(false);
     }
@@ -86,9 +95,10 @@ const OnboardingPage: React.FC = () => {
                   <button
                     key={index}
                     onClick={() => handleOptionClick(option, currentQuestion.prefix)}
-                    className="px-3 py-1.5 text-sm text-brand-primary bg-white border border-brand-secondary/50 rounded-full hover:bg-amber-50 hover:border-brand-secondary transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-brand-accent/50"
+                    className="px-3 py-1.5 text-sm text-brand-primary bg-white border border-brand-secondary/50 rounded-full hover:bg-amber-50 hover:border-brand-secondary transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-brand-accent/50 flex items-center space-x-2"
                   >
-                    {option}
+                    <span>{getSymbolForText(option)}</span>
+                    <span>{option}</span>
                   </button>
                 ))}
               </div>

@@ -1,5 +1,5 @@
-
 import React from 'react';
+import { getSymbolForText } from '../../utils/symbols';
 
 interface ChoiceButtonsProps {
   choices: string[];
@@ -13,9 +13,10 @@ const ChoiceButtons: React.FC<ChoiceButtonsProps> = ({ choices, onSelect }) => {
         <button
           key={index}
           onClick={() => onSelect(choice)}
-          className="px-4 py-2 text-sm font-semibold text-brand-primary bg-white border border-brand-secondary rounded-full hover:bg-red-50 transition-colors duration-200"
+          className="px-4 py-2 text-sm font-semibold text-brand-primary bg-white border border-brand-secondary rounded-full hover:bg-red-50 transition-colors duration-200 flex items-center space-x-2"
         >
-          {choice}
+          <span>{getSymbolForText(choice)}</span>
+          <span>{choice}</span>
         </button>
       ))}
     </div>

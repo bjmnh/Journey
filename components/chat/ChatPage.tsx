@@ -1,9 +1,9 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAppContext } from '../../contexts/AppContext';
 import type { ChatMessage } from '../../types';
 import { getChatResponse } from '../../services/geminiService';
+import { updateCharacterSheet } from '../../services/supabaseService';
 import MessageBubble from './MessageBubble';
 import ChatInputForm from './ChatInputForm';
 import { ArrowLeft } from 'lucide-react';
@@ -11,7 +11,7 @@ import { ArrowLeft } from 'lucide-react';
 const ChatPage: React.FC = () => {
   const { tropeName } = useParams<{ tropeName: string }>();
   const navigate = useNavigate();
-  const { characterSheet, activeTrope, isLoading, setIsLoading } = useAppContext();
+  const { characterSheet, setCharacterSheet, activeTrope, isLoading, setIsLoading } = useAppContext();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const chatContainerRef = useRef<HTMLDivElement>(null);
 
@@ -45,13 +45,21 @@ const ChatPage: React.FC = () => {
     setIsLoading(true);
 
     try {
-      const aiResponse = await getChatResponse(characterSheet, newMessages);
+      const aiResponse = await getChatResponse(characterSheet, newMessages, activeTrope);
       const aiMessage: ChatMessage = {
         role: 'ai',
         content: aiResponse.question,
         choices: aiResponse.choices,
       };
       setMessages(prev => [...prev, aiMessage]);
+
+      // Update character sheet if AI suggests changes
+      if (aiResponse.updatedCharacterSheet) {
+        const updated = await updateCharacterSheet(aiResponse.updatedCharacterSheet);
+        if (updated) {
+          setCharacterSheet(updated);
+        }
+      }
     } catch (error) {
       console.error("Failed to get chat response:", error);
       const errorMessage: ChatMessage = {

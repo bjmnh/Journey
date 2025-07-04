@@ -1,3 +1,4 @@
+import { getSymbolForText } from './utils/symbols';
 
 export const ONBOARDING_STEPS = [
   {
