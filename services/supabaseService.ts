@@ -113,10 +113,14 @@ export const getCharacterSheet = async (): Promise<CharacterSheet | null> => {
     .eq('user_id', user.id)
     .order('created_at', { ascending: false })
     .limit(1)
-    .single();
+    .maybeSingle();
 
   if (error) {
     console.error('Error fetching character sheet:', error);
+    return null;
+  }
+
+  if (!data) {
     return null;
   }
 
