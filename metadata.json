@@ -1,0 +1,6 @@
+{
+  "name": "Project Archetype",
+  "description": "An AI-powered web application that helps users explore their personal life situations through the lens of narrative tropes. Users complete a 'character sheet' and the AI identifies prominent archetypes, leading to guided, interactive chat sessions.",
+  "requestFramePermissions": [],
+  "prompt": ""
+}
